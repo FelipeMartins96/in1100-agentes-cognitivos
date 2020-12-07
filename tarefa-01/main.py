@@ -3,9 +3,9 @@ import copy
 
 
 class Node():
-    def __init__(self, state, prev_state, prev_action, g):
+    def __init__(self, state, prev_node, prev_action, g):
         self.state = state
-        self.prev_state = prev_state
+        self.prev_node = prev_node
         self.prev_action = prev_action
         self.g = g
         self.h = self._heuristic()
@@ -26,9 +26,9 @@ class Node():
         return self.state == [1, 2, 3, 4, 5, 6, 7, 8, 0]
 
     def unroll(self):
-        if self.prev_state == None:
+        if self.prev_node == None:
             return [(self.state, None)]
-        return self.prev_state.unroll() + [(self.state, self.prev_action)]
+        return self.prev_node.unroll() + [(self.state, self.prev_action)]
 
     def get_neighbors_nodes(self):
         neighbors = []
@@ -39,28 +39,28 @@ class Node():
             new_state[blank_index] = self.state[blank_index - 3]
             new_state[blank_index - 3] = self.state[blank_index]
             neighbors.append(
-                Node(state=new_state, prev_state=self, prev_action="UP", g=self.g + 1))
+                Node(state=new_state, prev_node=self, prev_action="UP", g=self.g + 1))
         # DOWN
         if blank_index + 3 < 9:
             new_state = copy.deepcopy(self.state)
             new_state[blank_index] = self.state[blank_index + 3]
             new_state[blank_index + 3] = self.state[blank_index]
             neighbors.append(
-                Node(state=new_state, prev_state=self, prev_action="DOWN", g=self.g + 1))
+                Node(state=new_state, prev_node=self, prev_action="DOWN", g=self.g + 1))
         # LEFT
         if blank_index % 3 > 0:
             new_state = copy.deepcopy(self.state)
             new_state[blank_index] = self.state[blank_index - 1]
             new_state[blank_index - 1] = self.state[blank_index]
             neighbors.append(
-                Node(state=new_state, prev_state=self, prev_action="LEFT", g=self.g + 1))
+                Node(state=new_state, prev_node=self, prev_action="LEFT", g=self.g + 1))
         # RIGHT
         if blank_index % 3 < 2:
             new_state = copy.deepcopy(self.state)
             new_state[blank_index] = self.state[blank_index + 1]
             new_state[blank_index + 1] = self.state[blank_index]
             neighbors.append(
-                Node(state=new_state, prev_state=self, prev_action="DOWN", g=self.g + 1))
+                Node(state=new_state, prev_node=self, prev_action="DOWN", g=self.g + 1))
 
         return neighbors
 
@@ -80,12 +80,22 @@ def is_best_path_to_node(node, open_list, closed_list):
 
 
 def search_a_star(initial_state):
-    open_list = [Node(state=initial_state, prev_state=None,
+    open_list = [Node(state=initial_state, prev_node=None,
                       prev_action=None, g=0)]
     closed_list = []
+    step = 0
 
     while len(open_list):
         open_list.sort(key=Node.get_f)
+        # Print open list
+        print("===============================================================")
+        print(f"Step = {step}")
+        for node in open_list:
+            print(node.state[0:3])
+            print(node.state[3:6])
+            print(node.state[6:9])
+            print(f"g -> {node.g}, h -> {node.h}, f -> {node.get_f()}, prev_action -> {node.prev_action}")
+
         current_node = open_list.pop(0)
 
         if current_node.is_final():
@@ -96,6 +106,7 @@ def search_a_star(initial_state):
                 open_list.append(neighbor)
 
         closed_list.append(current_node)
+        step += 1
 
     return None
 
