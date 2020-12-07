@@ -122,5 +122,4 @@ def get_initial_state():
     state = [1, 2, 3, 4, 5, 6, 7, 8, 0]
     while not is_state_solvable(state):
         random.shuffle(state)
-    print(state)
     return state
