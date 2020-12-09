@@ -16,7 +16,8 @@ screen = pygame.display.set_mode(size)
 medium_font = pygame.font.Font("OpenSans-Regular.ttf", 28)
 move_font = pygame.font.Font("OpenSans-Regular.ttf", 60)
 
-state = main.get_initial_state()
+# state = main.get_initial_state()
+state = [1, 8, 2, 0, 4, 3, 7, 6, 5]
 path = None
 solved = False
 

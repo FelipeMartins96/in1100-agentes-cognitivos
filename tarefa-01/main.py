@@ -60,7 +60,7 @@ class Node():
             new_state[blank_index] = self.state[blank_index + 1]
             new_state[blank_index + 1] = self.state[blank_index]
             neighbors.append(
-                Node(state=new_state, prev_node=self, prev_action="DOWN", g=self.g + 1))
+                Node(state=new_state, prev_node=self, prev_action="RIGHT", g=self.g + 1))
 
         return neighbors
 
@@ -89,21 +89,54 @@ def search_a_star(initial_state):
         step += 1
         open_list.sort(key=Node.get_f)
         # Print open list
+
+        str1 =  ""
+        str2 =  ""
+        str3 =  ""
+        str4 =  ""
+        str5 =  ""
+        str6 =  ""
+        str7 =  ""
         print("===============================================================")
         print(f"Step = {step}")
+        print("Open List")
+        for node in open_list:
+            str1 +=  (str(node.state[0:3]) + "               ")[:15]
+            str2 +=  (str(node.state[3:6]) + "               ")[:15]
+            str3 +=  (str(node.state[6:9]) + "               ")[:15]
+            str4 +=  (f"g -> {node.g}" + "               ")[:15]
+            str5 +=  (f"h -> {node.h}" + "               ")[:15]
+            str6 +=  (f"f -> {node.get_f()}" + "               ")[:15]
+            str7 +=  (f"{node.prev_action}" + "               ")[:15]
 
+        print(str1)
+        print(str2)
+        print(str3)
+        print(str4)
+        print(str5)
+        print(str6)
+        print(str7)
+        
         current_node = open_list.pop(0)
         closed_list.append(current_node)
 
+        # print("Current Node")
+        # print(current_node.state[0:3])
+        # print(current_node.state[3:6])
+        # print(current_node.state[6:9])
+        # print(f"g -> {current_node.g}")
+        # print(f"h -> {current_node.h}")
+        # print(f"f -> {current_node.get_f()}")
+        # print(f"prev_action -> {current_node.prev_action}")
+        
         if current_node.is_final():
             return current_node.unroll()
-
+        
         for neighbor in current_node.get_neighbors_nodes():
             if is_best_path_to_node(neighbor, open_list, closed_list):
                 open_list.append(neighbor)
 
-        print(str1)
-        print(str2)
+
 
     return None
 
