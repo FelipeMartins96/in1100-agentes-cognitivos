@@ -14,8 +14,8 @@ class Node():
         distance_sum = 0
         for value in range(1, 9):
             value_index = self.state.index(value)
-            distance_i = abs((value_index % 3) - ((value - 1) % 3))
-            distance_j = abs((value_index // 3) - ((value - 1) // 3))
+            distance_i = abs((value_index // 3) - ((value - 1) // 3))
+            distance_j = abs((value_index % 3) - ((value - 1) % 3))
             distance_sum += distance_i + distance_j
         return distance_sum
 
@@ -86,17 +86,14 @@ def search_a_star(initial_state):
     step = 0
 
     while len(open_list):
+        step += 1
         open_list.sort(key=Node.get_f)
         # Print open list
         print("===============================================================")
         print(f"Step = {step}")
-        for node in open_list:
-            print(node.state[0:3])
-            print(node.state[3:6])
-            print(node.state[6:9])
-            print(f"g -> {node.g}, h -> {node.h}, f -> {node.get_f()}, prev_action -> {node.prev_action}")
 
         current_node = open_list.pop(0)
+        closed_list.append(current_node)
 
         if current_node.is_final():
             return current_node.unroll()
@@ -105,8 +102,8 @@ def search_a_star(initial_state):
             if is_best_path_to_node(neighbor, open_list, closed_list):
                 open_list.append(neighbor)
 
-        closed_list.append(current_node)
-        step += 1
+        print(str1)
+        print(str2)
 
     return None
 
