@@ -1,166 +1,87 @@
-import random
-import copy
+import pygame
+import sys
+import time
+import j8n
+import numpy as np
 
+pygame.init()
+size = width, height = 600, 400
 
-class Node():
-    def __init__(self, state, prev_node, prev_action, g):
-        self.state = state
-        self.prev_node = prev_node
-        self.prev_action = prev_action
-        self.g = g
-        self.h = self._heuristic()
+# Colors
+black = (0, 0, 0)
+white = (255, 255, 255)
 
-    def _heuristic(self):
-        distance_sum = 0
-        for value in range(1, 9):
-            value_index = self.state.index(value)
-            distance_i = abs((value_index // 3) - ((value - 1) // 3))
-            distance_j = abs((value_index % 3) - ((value - 1) % 3))
-            distance_sum += distance_i + distance_j
-        return distance_sum
+screen = pygame.display.set_mode(size)
 
-    def get_f(self):
-        return self.g + self.h
+medium_font = pygame.font.Font("OpenSans-Regular.ttf", 28)
+move_font = pygame.font.Font("OpenSans-Regular.ttf", 60)
 
-    def is_final(self):
-        return self.state == [1, 2, 3, 4, 5, 6, 7, 8, 0]
+state = j8n.get_initial_state()
+path = None
+solved = False
 
-    def unroll(self):
-        if self.prev_node == None:
-            return [(self.state, None)]
-        return self.prev_node.unroll() + [(self.state, self.prev_action)]
+while True:
 
-    def get_neighbors_nodes(self):
-        neighbors = []
-        blank_index = self.state.index(0)
-        # UP
-        if blank_index - 3 >= 0:
-            new_state = copy.deepcopy(self.state)
-            new_state[blank_index] = self.state[blank_index - 3]
-            new_state[blank_index - 3] = self.state[blank_index]
-            neighbors.append(
-                Node(state=new_state, prev_node=self, prev_action="UP", g=self.g + 1))
-        # DOWN
-        if blank_index + 3 < 9:
-            new_state = copy.deepcopy(self.state)
-            new_state[blank_index] = self.state[blank_index + 3]
-            new_state[blank_index + 3] = self.state[blank_index]
-            neighbors.append(
-                Node(state=new_state, prev_node=self, prev_action="DOWN", g=self.g + 1))
-        # LEFT
-        if blank_index % 3 > 0:
-            new_state = copy.deepcopy(self.state)
-            new_state[blank_index] = self.state[blank_index - 1]
-            new_state[blank_index - 1] = self.state[blank_index]
-            neighbors.append(
-                Node(state=new_state, prev_node=self, prev_action="LEFT", g=self.g + 1))
-        # RIGHT
-        if blank_index % 3 < 2:
-            new_state = copy.deepcopy(self.state)
-            new_state[blank_index] = self.state[blank_index + 1]
-            new_state[blank_index + 1] = self.state[blank_index]
-            neighbors.append(
-                Node(state=new_state, prev_node=self, prev_action="RIGHT", g=self.g + 1))
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            sys.exit()
 
-        return neighbors
+    screen.fill(black)
 
+    # Show title
+    if path == None:
+        title = "Searching for solution using A*"
+    elif solved:
+        title = f"Puzzle Solved"
+    elif action == None:
+        title = f"Solved in {len(path) - 1} Moves! Press to show path"
+    else:
+        title = f"Move '{action}', press for next move"
 
-def is_best_path_to_node(node, open_list, closed_list):
-    for node_in_list in open_list:
-        if node.state == node_in_list.state:
-            if node_in_list.get_f() <= node.get_f():
-                return False
+    title = medium_font.render(title, True, white)
+    titleRect = title.get_rect()
+    titleRect.center = ((width / 2), 30)
+    screen.blit(title, titleRect)
 
-    for node_in_list in closed_list:
-        if node.state == node_in_list.state:
-            if node_in_list.get_f() <= node.get_f():
-                return False
+    # Draw game board
+    tile_size = 80
+    tile_origin = (width / 2 - (1.5 * tile_size),
+                   height / 2 - (1.5 * tile_size))
+    tiles = []
 
-    return True
+    board = np.reshape(state, (3, 3))
+    for i in range(3):
+        row = []
+        for j in range(3):
+            rect = pygame.Rect(
+                tile_origin[0] + j * tile_size,
+                tile_origin[1] + i * tile_size,
+                tile_size, tile_size
+            )
+            pygame.draw.rect(screen, white, rect, 3)
 
+            move = move_font.render(
+                " " if board[i][j] == 0 else str(board[i][j]), True, white)
+            moveRect = move.get_rect()
+            moveRect.center = rect.center
+            screen.blit(move, moveRect)
+            row.append(rect)
+        tiles.append(row)
 
-def search_a_star(initial_state):
-    open_list = [Node(state=initial_state, prev_node=None,
-                      prev_action=None, g=0)]
-    closed_list = []
-    step = 0
+    # Check for a user move
+    click, _, _ = pygame.mouse.get_pressed()
+    if click == 1:
+        if len(path):
+            state, action = path.pop(0)
+        else:
+            solved = True
+        time.sleep(0.2)
 
-    while len(open_list):
-        step += 1
-        open_list.sort(key=Node.get_f)
-        # Print open list
+    pygame.display.flip()
 
-        str1 =  ""
-        str2 =  ""
-        str3 =  ""
-        str4 =  ""
-        str5 =  ""
-        str6 =  ""
-        str7 =  ""
-        print("===============================================================")
-        print(f"Step = {step}")
-        print("Open List")
-        for node in open_list:
-            str1 +=  (str(node.state[0:3]) + "               ")[:15]
-            str2 +=  (str(node.state[3:6]) + "               ")[:15]
-            str3 +=  (str(node.state[6:9]) + "               ")[:15]
-            str4 +=  (f"g -> {node.g}" + "               ")[:15]
-            str5 +=  (f"h -> {node.h}" + "               ")[:15]
-            str6 +=  (f"f -> {node.get_f()}" + "               ")[:15]
-            str7 +=  (f"{node.prev_action}" + "               ")[:15]
-
-        print(str1)
-        print(str2)
-        print(str3)
-        print(str4)
-        print(str5)
-        print(str6)
-        print(str7)
-        
-        current_node = open_list.pop(0)
-        closed_list.append(current_node)
-
-        # print("Current Node")
-        # print(current_node.state[0:3])
-        # print(current_node.state[3:6])
-        # print(current_node.state[6:9])
-        # print(f"g -> {current_node.g}")
-        # print(f"h -> {current_node.h}")
-        # print(f"f -> {current_node.get_f()}")
-        # print(f"prev_action -> {current_node.prev_action}")
-        
-        if current_node.is_final():
-            return current_node.unroll()
-        
-        for neighbor in current_node.get_neighbors_nodes():
-            if is_best_path_to_node(neighbor, open_list, closed_list):
-                open_list.append(neighbor)
-
-
-
-    return None
-
-
-def is_state_solvable(state):
-    # final state as invalid initial state
-    if state == [1, 2, 3, 4, 5, 6, 7, 8, 0]:
-        return False
-
-    n_inversions = 0
-    for i in range(len(state)):
-        if state[i] == 0:
-            continue
-        for j in range(i+1, len(state)):
-            if state[j] == 0:
-                continue
-            if state[i] > state[j]:
-                n_inversions += 1
-
-    return n_inversions % 2 == 0
-
-
-def get_initial_state():
-    state = [1, 2, 3, 4, 5, 6, 7, 8, 0]
-    while not is_state_solvable(state):
-        random.shuffle(state)
-    return state
+    if path == None:
+        search_time = time.perf_counter()
+        path = j8n.search_a_star(state)
+        search_time = time.perf_counter() - search_time
+        print("Search Time (s)", search_time)
+        state, action = path.pop(0)
