@@ -73,21 +73,21 @@ def plot_result(
     y_best = [cities[city_idx][1] for city_idx in best_route]  # only y_best
 
     fig, (ax1, ax2, ax3) = plt.subplots(1, 3)
-    fig.set_figheight(12)
+    fig.set_figheight(6)
     fig.set_figwidth(13)
     fig.suptitle(
         f"Iteration {iteration} Solution, Reached in {n_steps} steps", fontsize=14, fontweight="bold")
 
     # ax1 = fig.add_subplot(121)
     # seems like x_initial and y_initial are inverted
-    ax1.plot(y_initial + [y_initial[0]], x_initial + [x_initial[0]], "--ko")
+    ax1.plot(y_initial + [y_initial[0]], x_initial + [x_initial[0]], linewidth=0.3, marker=".", color="k")
 
     # ax2 = fig.add_subplot(122)
-    ax2.plot(cost_history, "-k")
+    ax2.plot(cost_history, linewidth=0.3, marker=".", color="k")
 
     # ax3 = fig.add_subplot(12)
     # seems like x_best and y_best are inverted
-    ax3.plot(y_best + [y_best[0]], x_best + [x_best[0]], "--ko")
+    ax3.plot(y_best + [y_best[0]], x_best + [x_best[0]], linewidth=0.3, marker=".", color="k")
 
     plt.show()
 
@@ -121,5 +121,5 @@ if __name__ == "__main__":
 
             if improved:
                 cost_history.append(best_cost)
+        plot_result(cities, i + 1, steps, initial_route, best_route, cost_history)
 
-        plot_result(cities, i, steps, initial_route, best_route, cost_history)
